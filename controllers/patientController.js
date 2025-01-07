@@ -255,7 +255,10 @@ const updatePayment = async (req, res) => {
     }
 
     await patient.save();
-    res.json(visit);
+    
+    // Return the entire updated patient document
+    const updatedPatient = await Patient.findById(id);
+    res.json(updatedPatient);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
