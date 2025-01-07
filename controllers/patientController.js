@@ -34,7 +34,33 @@ const registerPatient = async (req, res) => {
         formNumber,
         vitals: vitals || {},
         symptomsA: symptomsA || {},
-        isEyeDoctor: isEyeDoctor
+        isEyeDoctor: isEyeDoctor,
+        payments: {
+          registration: {
+            LRD: 0,
+            USD: 0,
+            percentagePaid: 0,
+            totalAmount: { LRD: 0, USD: 0 },
+            paid: false,
+            partialPayment: false
+          },
+          laboratory: {
+            LRD: 0,
+            USD: 0,
+            percentagePaid: 0,
+            totalAmount: { LRD: 0, USD: 0 },
+            paid: false,
+            partialPayment: false
+          },
+          medication: {
+            LRD: 0,
+            USD: 0,
+            percentagePaid: 0,
+            totalAmount: { LRD: 0, USD: 0 },
+            paid: false,
+            partialPayment: false
+          }
+        }
       }]
     })
 
@@ -539,43 +565,57 @@ const updateProgress = async (req, res) => {
 
 // Create a new visit for existing patient
 const createNewVisit = async (req, res) => {
-  const { id } = req.params
-  const { formNumber, vitals, symptomsA, isEyeDoctor } = req.body
+  const { id } = req.params;
+  const { formNumber, vitals, symptomsA, isEyeDoctor } = req.body;
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).json({ error: 'No such patient' })
-    }
-
-    if (!formNumber) {
-      throw Error('Form number is required')
-    }
-
-    // Check if form number already exists in any visit
-    const formNumberExists = await Patient.findOne({ 'visits.formNumber': formNumber })
-    if (formNumberExists) {
-      throw Error('Form number already in use')
-    }
-
-    const patient = await Patient.findById(id)
+    const patient = await Patient.findById(id);
     if (!patient) {
-      return res.status(404).json({ error: 'No such patient' })
+      return res.status(404).json({ error: 'Patient not found' });
     }
 
-    patient.visits.push({
+    const newVisit = {
       visitDate: new Date(),
       formNumber,
       vitals: vitals || {},
       symptomsA: symptomsA || {},
-      isEyeDoctor: isEyeDoctor
-    })
+      isEyeDoctor,
+      payments: {
+        registration: {
+          LRD: 0,
+          USD: 0,
+          percentagePaid: 0,
+          totalAmount: { LRD: 0, USD: 0 },
+          paid: false,
+          partialPayment: false
+        },
+        laboratory: {
+          LRD: 0,
+          USD: 0,
+          percentagePaid: 0,
+          totalAmount: { LRD: 0, USD: 0 },
+          paid: false,
+          partialPayment: false
+        },
+        medication: {
+          LRD: 0,
+          USD: 0,
+          percentagePaid: 0,
+          totalAmount: { LRD: 0, USD: 0 },
+          paid: false,
+          partialPayment: false
+        }
+      }
+    };
 
-    await patient.save()
-    res.status(200).json(patient)
+    patient.visits.push(newVisit);
+    await patient.save();
+
+    res.status(200).json(patient);
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).json({ error: error.message });
   }
-}
+};
 
 // Get a single patient with basic info
 const getPatientBasicInfo = async (req, res) => {
