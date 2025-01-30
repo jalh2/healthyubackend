@@ -293,7 +293,7 @@ const updatePayment = async (req, res) => {
 // Update doctor notes for a specific visit
 const updateDoctorNotes = async (req, res) => {
   const { id, visitId } = req.params;
-  const { doctorNote, prescription } = req.body;
+  const { doctorNote, prescription, progress } = req.body;
 
   try {
     const patient = await Patient.findById(id);
@@ -311,9 +311,14 @@ const updateDoctorNotes = async (req, res) => {
       doctorNote,
       prescription
     };
+    
+    // Update progress status
+    if (progress) {
+      patient.visits[visitIndex].progress = progress;
+    }
 
     await patient.save();
-    res.json(patient.visits[visitIndex]);
+    res.json(patient); // Return the full patient object
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

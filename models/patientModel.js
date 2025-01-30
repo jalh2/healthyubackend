@@ -184,6 +184,7 @@ const visitSchema = new Schema({
       "Laboratory payment partial",
       "Laboratory tests completed",
       "Doctor consultation completed",
+      "Doctor prescription updated - awaiting medical payment",
       "Medication payment completed",
       "Medication payment partial",
       "Treatment completed"
